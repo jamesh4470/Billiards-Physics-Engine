@@ -27,8 +27,6 @@ class Ball:
         self.force_applied = False
     
     def set_direction(self, direction):
-        # any number of laps around the circle lands you back where you started,
-        # and this also drags negative angles back up into range
         direction %= 360
         self.direction = direction
         # actual direction: degree to the closest horizontal line
@@ -151,8 +149,6 @@ while running:
                 ball.set_direction(inverse_angle((360 - ball.direction)))
             elif 90 > ball.direction > 0:
                 ball.set_direction(inverse_angle(360 - ball.direction))
-        # the top and bottom walls get a check of their own, otherwise a ball sat in a
-        # corner would only ever bounce off one of the two walls it is touching
         if ball.position_vector.y < 0 + ball.radius:
             ball.position_vector.y = 0 + ball.radius
             if ball.direction == 90:
@@ -185,14 +181,9 @@ while running:
             # kill me
             x_1 = (4*a**3 - 4*a**2*h - math.sqrt(abs((-4*a**3 + 4*a**2*h - 4*a*b**2 + 8*a*b*k + 4*a*c**2 + 4*a*h**2 - 4*a*k**2 - 4*a*r**2 - 4*b**2*h + 8*b*h*k - 4*c**2*h - 4*h**3 - 4*h*k**2 + 4*h*r**2)**2 - 4*(4*a**2 - 8*a*h + 4*b**2 - 8*b*k + 4*h**2 + 4*k**2) * (a**4 + 2*a**2*b**2 - 4*a**2*b*k - 2*a**2*c**2 - 2*a**2*h**2 + 2*a**2*k**2 + 2*a**2*r**2 + b**4 - 4*b**3*k - 2*b**2*c**2 + 2*b**2*h**2 + 6*b**2*k**2 - 2*b**2*r**2 + 4*b*c**2*k - 4*b*h**2*k - 4*b*k**3 + 4*b*k*r**2 + c**4 + 2*c**2*h**2 - 2*c**2*k**2 - 2*c**2*r**2 + h**4 + 2*h**2*k**2 - 2*h**2*r**2 + k**4 - 2*k**2*r**2 + r**4))) + 4*a*b**2 - 8*a*b*k - 4*a*c**2 - 4*a*h**2 + 4*a*k**2 + 4*a*r**2 + 4*b**2*h - 8*b*h*k + 4*c**2*h + 4*h**3 + 4*h*k**2 - 4*h*r**2)/(2*(4*a**2 - 8*a*h + 4*b**2 - 8*b*k + 4*h**2 + 4*k**2))
             x_2 = (4*a**3 - 4*a**2*h - (-1 * math.sqrt(abs((-4*a**3 + 4*a**2*h - 4*a*b**2 + 8*a*b*k + 4*a*c**2 + 4*a*h**2 - 4*a*k**2 - 4*a*r**2 - 4*b**2*h + 8*b*h*k - 4*c**2*h - 4*h**3 - 4*h*k**2 + 4*h*r**2)**2 - 4*(4*a**2 - 8*a*h + 4*b**2 - 8*b*k + 4*h**2 + 4*k**2) * (a**4 + 2*a**2*b**2 - 4*a**2*b*k - 2*a**2*c**2 - 2*a**2*h**2 + 2*a**2*k**2 + 2*a**2*r**2 + b**4 - 4*b**3*k - 2*b**2*c**2 + 2*b**2*h**2 + 6*b**2*k**2 - 2*b**2*r**2 + 4*b*c**2*k - 4*b*h**2*k - 4*b*k**3 + 4*b*k*r**2 + c**4 + 2*c**2*h**2 - 2*c**2*k**2 - 2*c**2*r**2 + h**4 + 2*h**2*k**2 - 2*h**2*r**2 + k**4 - 2*k**2*r**2 + r**4)))) + 4*a*b**2 - 8*a*b*k - 4*a*c**2 - 4*a*h**2 + 4*a*k**2 + 4*a*r**2 + 4*b**2*h - 8*b*h*k + 4*c**2*h + 4*h**3 + 4*h*k**2 - 4*h*r**2)/(2*(4*a**2 - 8*a*h + 4*b**2 - 8*b*k + 4*h**2 + 4*k**2))
-            # the tangent line at the point of impact runs parallel to the chord joining the
-            # two points where the circles cross, so that slope is the only thing needed
             if round(x_1) == round(x_2):
-                # the circles cross one directly above the other, tangent line is vertical
                 tangent_angle = 90
             else:
-                # taking one circle's equation away from the other leaves the line through
-                # both crossing points, which hands over the y belonging to each x
                 y_1 = (r**2 - c**2 + a**2 + b**2 - h**2 - k**2 - 2*(a - h)*x_1)/(2*(b - k))
                 y_2 = (r**2 - c**2 + a**2 + b**2 - h**2 - k**2 - 2*(a - h)*x_2)/(2*(b - k))
                 tangent = (y_2 - y_1)/(x_2 - x_1)
@@ -205,25 +196,17 @@ while running:
             # the pain is finally over.
             # print(tangent_angle)
 
-            # chop both velocities into a part running along the tangent line and a part
-            # running along the normal. only the normal parts take part in the collision,
-            # the tangent parts slide past each other untouched
             ball_one_vel_cos = balls[0].velocity * math.cos(math.radians(balls[0].direction - tangent_angle))
             ball_one_vel_sin = balls[0].velocity * math.sin(math.radians(balls[0].direction - tangent_angle))
             ball_two_vel_cos = balls[1].velocity * math.cos(math.radians(balls[1].direction - tangent_angle))
             ball_two_vel_sin = balls[1].velocity * math.sin(math.radians(balls[1].direction - tangent_angle))
             ballonevel, balltwovel = calculate_final_velocities(balls[0], balls[1], ball_one_vel_sin, ball_two_vel_sin)
 
-            # stitch the untouched tangent part back onto the swapped normal part. atan2
-            # remembers which quadrant the answer came from, which asin cannot do, and it
-            # also survives a ball being brought to a dead stop by the collision
             balls[0].velocity = math.sqrt(ball_one_vel_cos**2 + ballonevel**2)
             balls[0].set_direction(tangent_angle + math.degrees(math.atan2(ballonevel, ball_one_vel_cos)))
             balls[1].velocity = math.sqrt(ball_two_vel_cos**2 + balltwovel**2)
             balls[1].set_direction(tangent_angle + math.degrees(math.atan2(balltwovel, ball_two_vel_cos)))
 
-            # shove the balls apart along the line joining their centres until they are only
-            # touching, otherwise they are still overlapping and collide again on the spot
             overlap = (balls[0].radius + balls[1].radius) - distance
             push_x = ((balls[0].position_vector.x - balls[1].position_vector.x) / distance) * (overlap / 2)
             push_y = ((balls[0].position_vector.y - balls[1].position_vector.y) / distance) * (overlap / 2)
@@ -232,9 +215,6 @@ while running:
             balls[1].position_vector.x -= push_x
             balls[1].position_vector.y -= push_y
 
-            # now that the balls get separated properly this only has to cover the one
-            # frame straight after the impact, instead of blanking out collisions for the
-            # next hundred frames and letting the pair sail straight through each other
             collision_cooldown_frames = 1
 
     if collision_cooldown_frames > 0:
